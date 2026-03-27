@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complex Case Knowledge Base — SilverStay</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0D1F35;
+    --navy-mid: #1a3250;
+    --navy-light: #2a4a6e;
+    --slate: #EEF1F5;
+    --accent: #3B82F6;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --border: #dde3ed;
+    --white: #ffffff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--slate); color: var(--text); min-height: 100vh; }
+
+  header {
+    background: var(--navy); padding: 0 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 58px; position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 12px rgba(13,31,53,0.3);
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-mark {
+    width: 30px; height: 30px; background: var(--accent); border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif; color: white; font-size: 15px; font-style: italic;
+  }
+  .logo-text { color: white; font-size: 14px; font-weight: 600; }
+  .logo-sub { color: rgba(255,255,255,0.4); font-size: 11px; }
+  .sync-badge {
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.55); font-size: 11px; padding: 4px 11px;
+    border-radius: 20px; cursor: pointer; transition: background 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .sync-badge:hover { background: rgba(255,255,255,0.12); }
+  .sync-badge.syncing { color: #60a5fa; border-color: rgba(96,165,250,0.4); }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: #4ade80; }
+  .dot.spin { background: #60a5fa; animation: blink 0.7s infinite; }
+  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+  .hero {
+    background: var(--navy); padding: 2rem 1.5rem 2.5rem;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content:''; position:absolute; top:-60px; left:50%; transform:translateX(-50%);
+    width:500px; height:260px;
+    background:radial-gradient(ellipse,rgba(59,130,246,0.15) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+    color: white; line-height: 1.2; margin-bottom: 8px; position: relative;
+  }
+  .hero h1 em { color: var(--accent); font-style: italic; }
+  .hero p { color: rgba(255,255,255,0.5); font-size: 13px; margin-bottom: 1.5rem; }
+
+  .search-container { max-width: 620px; margin: 0 auto; position: relative; z-index: 2; }
+  .search-wrapper {
+    display: flex; background: white; border-radius: 12px;
+    padding: 5px 5px 5px 16px; align-items: center; gap: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.22); border: 2px solid transparent; transition: border-color 0.2s;
+  }
+  .search-wrapper:focus-within { border-color: var(--accent); }
+  #searchInput {
+    flex: 1; border: none; outline: none; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; color: var(--text); background: transparent;
+  }
+  #searchInput::placeholder { color: #94a3b8; }
+  #searchBtn {
+    background: var(--navy); color: white; border: none; border-radius: 8px;
+    padding: 9px 18px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: background 0.2s; white-space: nowrap;
+  }
+  #searchBtn:hover { background: var(--navy-mid); }
+  #searchBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .filter-bar { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
+  .filter-pill {
+    background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.14); border-radius: 20px;
+    padding: 4px 12px; font-size: 11px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+  }
+  .filter-pill:hover, .filter-pill.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  main { max-width: 860px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+  #statusBar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; min-height: 24px; }
+  #resultCount { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+  #lastSyncLabel { font-size: 11px; color: #94a3b8; }
+
+  #aiAnswer {
+    display: none; background: white; border-radius: 14px;
+    border: 2px solid var(--accent); padding: 1.25rem;
+    margin-bottom: 1.25rem; box-shadow: 0 4px 20px rgba(59,130,246,0.1);
+    animation: fadeIn 0.3s ease;
+  }
+  .ai-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .ai-chip {
+    background: var(--accent); color: white; font-size: 10px; font-weight: 700;
+    padding: 2px 9px; border-radius: 20px; letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .ai-title { font-size: 12px; color: var(--text-muted); }
+  #aiAnswerText { font-size: 14px; line-height: 1.7; color: var(--text); white-space: pre-wrap; }
+
+  .loading-dots { display: inline-flex; gap: 3px; align-items: center; }
+  .loading-dots span { width: 5px; height: 5px; background: var(--accent); border-radius: 50%; animation: bounce 1.2s infinite; }
+  .loading-dots span:nth-child(2){animation-delay:.2s} .loading-dots span:nth-child(3){animation-delay:.4s}
+  @keyframes bounce { 0%,100%{transform:translateY(0);opacity:0.4} 50%{transform:translateY(-4px);opacity:1} }
+
+  .quick-topics { margin-bottom: 1.25rem; }
+  .quick-topics h3 { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .topic-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .topic-chip {
+    background: white; border: 1px solid var(--border); border-radius: 20px;
+    padding: 5px 12px; font-size: 12px; color: var(--text);
+    cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+  }
+  .topic-chip:hover { border-color: var(--accent); color: var(--accent); background: #eff6ff; }
+
+  #caseFeed { display: flex; flex-direction: column; gap: 10px; }
+  .case-card {
+    background: white; border-radius: 12px; border: 1px solid var(--border);
+    overflow: hidden; transition: box-shadow 0.2s, transform 0.15s;
+    animation: fadeIn 0.3s ease; cursor: pointer;
+  }
+  .case-card:hover { box-shadow: 0 4px 20px rgba(13,31,53,0.09); transform: translateY(-1px); }
+  .case-card.expanded .card-body { display: block; }
+  .case-card .card-body { display: none; }
+  .card-header { padding: 0.9rem 1.1rem; display: flex; align-items: flex-start; gap: 11px; }
+  .card-icon {
+    width: 32px; height: 32px; border-radius: 9px; background: var(--navy);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0; margin-top: 1px;
+  }
+  .card-meta { flex: 1; min-width: 0; }
+  .card-question { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; margin-bottom: 7px; }
+  .card-tags { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+  .tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .tag-snf { background: #dbeafe; color: #1e40af; }
+  .tag-alf { background: #dcfce7; color: #166534; }
+  .tag-ltc { background: #fef3c7; color: #92400e; }
+  .tag-housing { background: #f3e8ff; color: #6b21a8; }
+  .tag-transport { background: #ffe4e6; color: #9f1239; }
+  .tag-financial { background: #e0f2fe; color: #075985; }
+  .tag-behavioral { background: #fce7f3; color: #9d174d; }
+  .tag-insurance { background: #ecfdf5; color: #065f46; }
+  .tag-trach { background: #fff7ed; color: #9a3412; }
+  .tag-bariatric { background: #fef9c3; color: #713f12; }
+  .tag-dme { background: #f0f9ff; color: #0c4a6e; }
+  .tag-uninsured { background: #fdf4ff; color: #6b21a8; }
+  .card-asker { font-size: 11px; color: #94a3b8; margin-left: 2px; }
+  .card-date { font-size: 10px; color: #94a3b8; margin-left: auto; white-space: nowrap; padding-left: 8px; flex-shrink: 0; }
+  .chevron { font-size: 11px; color: #94a3b8; transition: transform 0.2s; flex-shrink: 0; margin-top: 3px; }
+  .case-card.expanded .chevron { transform: rotate(180deg); }
+  .card-body { border-top: 1px solid var(--border); padding: 0.9rem 1.1rem 1.1rem; background: #fafbfd; }
+  .answer-block { display: flex; gap: 9px; margin-bottom: 10px; }
+  .answer-block:last-child { margin-bottom: 0; }
+  .answer-avatar {
+    width: 24px; height: 24px; border-radius: 50%; background: var(--navy-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: white; flex-shrink: 0; margin-top: 1px;
+  }
+  .answer-author { font-size: 11px; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
+  .answer-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+  .no-ans { font-size: 13px; color: #94a3b8; font-style: italic; }
+
+  #loadingSkel { display: flex; flex-direction: column; gap: 10px; }
+  .skel-card {
+    background: white; border-radius: 12px; border: 1px solid var(--border);
+    padding: 0.9rem 1.1rem; display: flex; gap: 11px; animation: shimmer 1.4s infinite;
+  }
+  .s-ico { width: 32px; height: 32px; border-radius: 9px; background: #e2e8f0; flex-shrink: 0; }
+  .s-lines { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+  .s-line { height: 11px; border-radius: 5px; background: #e2e8f0; }
+  .s-l{width:82%} .s-m{width:54%} .s-s{width:30%}
+  @keyframes shimmer { 0%,100%{opacity:1}50%{opacity:0.5} }
+  .empty-state { text-align: center; padding: 2.5rem; color: var(--text-muted); font-size: 13px; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+  @media(max-width:520px){ .card-date{display:none} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">S</div>
+    <div>
+      <div class="logo-text">SilverStay</div>
+      <div class="logo-sub">Complex Case Knowledge Base</div>
+    </div>
+  </div>
+  <button class="sync-badge" id="syncBtn" onclick="syncNow()">
+    <div class="dot" id="syncDot"></div>
+    <span id="syncLabel">Live</span>
+  </button>
+</header>
+
+<div class="hero">
+  <h1>Find answers to <em>complex cases</em><br>in seconds</h1>
+  <p>Sourced from <strong style="color:rgba(255,255,255,0.8)">#complex-case-questions</strong> · Powered by AI</p>
+  <div class="search-container">
+    <div class="search-wrapper">
+      <span style="color:#94a3b8;font-size:17px;flex-shrink:0">🔍</span>
+      <input type="text" id="searchInput" placeholder="e.g. trach SNF, ALF low budget, bariatric placement…" autocomplete="off" />
+      <button id="searchBtn" onclick="doSearch()"><span id="btnText">Ask AI</span></button>
+    </div>
+    <div class="filter-bar">
+      <button class="filter-pill active" onclick="setFilter('all',this)">All</button>
+      <button class="filter-pill" onclick="setFilter('snf',this)">SNF</button>
+      <button class="filter-pill" onclick="setFilter('alf',this)">ALF</button>
+      <button class="filter-pill" onclick="setFilter('ltc',this)">LTC</button>
+      <button class="filter-pill" onclick="setFilter('housing',this)">Housing</button>
+      <button class="filter-pill" onclick="setFilter('financial',this)">Financial</button>
+      <button class="filter-pill" onclick="setFilter('behavioral',this)">Behavioral</button>
+      <button class="filter-pill" onclick="setFilter('insurance',this)">Insurance</button>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div id="statusBar">
+    <span id="resultCount"></span>
+    <span id="lastSyncLabel"></span>
+  </div>
+  <div id="aiAnswer">
+    <div class="ai-header">
+      <span class="ai-chip">✦ AI Summary</span>
+      <span class="ai-title">Synthesized from channel history</span>
+    </div>
+    <div id="aiAnswerText"></div>
+  </div>
+  <div id="quickTopics" class="quick-topics">
+    <h3>Browse by topic</h3>
+    <div class="topic-chips">
+      <button class="topic-chip" onclick="qs('SNF bariatric patient weight')">🏥 Bariatric SNF</button>
+      <button class="topic-chip" onclick="qs('ALF low budget under 2000')">💰 Low-budget ALF</button>
+      <button class="topic-chip" onclick="qs('trach SNF placement')">🩺 Trach placement</button>
+      <button class="topic-chip" onclick="qs('supportive housing homeless psych')">🏠 Supportive housing</button>
+      <button class="topic-chip" onclick="qs('LTC no POA guardianship')">⚖️ Guardianship / POA</button>
+      <button class="topic-chip" onclick="qs('TBI neuropsych consultant')">🧠 TBI / Neuropsych</button>
+      <button class="topic-chip" onclick="qs('uninsured undocumented placement')">🌐 Uninsured placement</button>
+      <button class="topic-chip" onclick="qs('oncology SNF radiation')">🎗️ Oncology + SNF</button>
+      <button class="topic-chip" onclick="qs('methadone substance abuse LTC')">💊 SA history LTC</button>
+      <button class="topic-chip" onclick="qs('DDA patient discharge')">📋 DDA patients</button>
+    </div>
+  </div>
+  <div id="loadingSkel">
+    <div class="skel-card"><div class="s-ico"></div><div class="s-lines"><div class="s-line s-l"></div><div class="s-line s-m"></div><div class="s-line s-s"></div></div></div>
+    <div class="skel-card"><div class="s-ico"></div><div class="s-lines"><div class="s-line s-l"></div><div class="s-line s-m"></div><div class="s-line s-s"></div></div></div>
+    <div class="skel-card"><div class="s-ico"></div><div class="s-lines"><div class="s-line s-l"></div><div class="s-line s-m"></div><div class="s-line s-s"></div></div></div>
+  </div>
+  <div id="caseFeed"></div>
+</main>
+
+<script>
+const API_KEY = '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';
+const CASES_KEY = 'ss_cases_v6', TS_KEY = 'ss_ts_v6';
+let all = [], shown = [], activeFilter = 'all', isSyncing = false;
+
+const SEED = [
+  {id:1,question:"Has anyone had luck with SNF admission to Lorien? Barriers are trach needs and CRE/CRO isolation.",asker:"Ashley",date:"Nov 5, 2025",tags:["snf","trach"],icon:"🩺",answers:[{author:"Tina",text:"Lorien Bel Air, Columbia and Mt Airy are their facilities that accept trachs. Isolation is the bigger issue — they'll likely need a private room. Is it a new trach (less than 30 days)?"}]},
+  {id:2,question:"Patient with $800/month income, state guardianship requires licensed ALF (not supportive care home). Any suggestions?",asker:"Vijay",date:"Nov 6, 2025",tags:["alf","financial"],icon:"💰",answers:[{author:"Tameka",text:"Have the hospital do a 3-month contract to ALF until the patient can apply for the waiver to help offset the cost."}]},
+  {id:3,question:"Any suggestions for a SNF willing to take a young bariatric patient (under 500 lbs) with recent criminal record, dropped from correctional facility? Total care.",asker:"Erin",date:"Nov 5, 2025",tags:["snf","bariatric"],icon:"⚖️",answers:[]},
+  {id:4,question:"Gold standard for submitting a LOC for patients on the border of LTC appropriate or not? Barriers for citizen who hasn't applied for Medicare/Medicaid going direct from hospital to LTC?",asker:"Vijay",date:"Nov 5, 2025",tags:["ltc","financial","insurance"],icon:"📋",answers:[{author:"Tina",text:"Submit LOC to include ALL NEEDS — OT, PT, SLP, wound care, ADLs. Ask OT for specific ADL and cognitive eval. Include summary in comments explaining why less restrictive won't work.\n2. Open enrollment for Medicare — MA office at the hospital should screen to see if they qualify for MA."}]},
+  {id:5,question:"Complex MedStar case — clinical team open to outside Neuropsych expert for TBI patient in restraints 20+ days. Any connections?",asker:"Vijay",date:"Jan 15, 2026",tags:["behavioral"],icon:"🧠",answers:[{author:"Erin",text:"Dr. Swanton at LifeBridge (eswanton@lifebridgehealth.org) has TBI experience — Sydney says he's responsive and encouraged outreach."},{author:"Ashley",text:"TBI waiver folks at UMROI might point you in the right direction."}]},
+  {id:6,question:"ALFs that can consider $2,000/month or less for patients with minimal care needs?",asker:"Nicole",date:"Jan 12, 2026",tags:["alf","financial"],icon:"💰",answers:[{author:"Nicole",text:"List posted on channel canvas. Please add any ALFs from your experience that aren't on it already."}]},
+  {id:7,question:"58-year-old woman with paranoid schizophrenia — $1,400/month, no payer, elopement risk, refuses meds/vitals, needs secure unit. Guardianship pending. Where can she discharge?",asker:"Erin",date:"Jan 7, 2026",tags:["alf","behavioral","financial"],icon:"🧠",answers:[{author:"Team",text:"We can likely find a secure ALF but it will cost more than $1,400/month. Apply for waiver (takes time). For unclaimed assets: have sister change mailing address to her home, search unclaimed money online. Once guardianship is granted she can request tax returns."}]},
+  {id:8,question:"Which LTC SNFs have trach beds available?",asker:"Erin",date:"Jan 5, 2026",tags:["snf","ltc","trach"],icon:"🩺",answers:[]},
+  {id:9,question:"Patient 462 lbs — has anyone had success with placement at this weight?",asker:"Tameka",date:"Feb 12, 2026",tags:["snf","bariatric"],icon:"⚖️",answers:[{author:"Ashley",text:"Only had success when the patient can at least stand. Feedback from nearly every facility: either under 400 lbs or must be able to stand/pivot."},{author:"Vijay",text:"Likely ALF contract, or work on weight reduction at the hospital: medication, PT/OT, nutrition plan."}]},
+  {id:10,question:"35-year-old female, homeless, extensive psych issues, $380/month income, refused shelter. Any supportive housing options?",asker:"Tameka",date:"Mar 12, 2026",tags:["housing","behavioral","financial"],icon:"🏠",answers:[{author:"Tina",text:"Healthy Mind Maryland Transitional Housing — 443-241-7940. Also Project Plase (410-837-1400), though the liaison has been hard to reach."}]},
+  {id:11,question:"LTC admissions questions for dementia patients: Is POA or legal guardian required for financial screen? Can non-POA family sign? Pathways when patient has no POA and no legal guardian?",asker:"Cristine",date:"Dec 5, 2025",tags:["ltc","financial"],icon:"⚖️",answers:[]},
+  {id:12,question:"Need LTC facility accepting patient with poly substance abuse history, stable on Methadone, history of suicide attempts. Autumn Lake is regional denial.",asker:"Erin",date:"Dec 18, 2025",tags:["ltc","behavioral"],icon:"💊",answers:[]},
+  {id:13,question:"Complex contract case: patient not a citizen, uninsured. UMROI paying $3k/month at ALF. Original plan for family to take to Georgia — blocked (brother has cancer). What else can we do?",asker:"Nicole",date:"Dec 19, 2025",tags:["alf","financial","uninsured"],icon:"🌐",answers:[{author:"Nicole/Vijay",text:"Schedule meeting with Jenna at UMROI to discuss long-term contract — significant cost savings from LTC to ALF already. Consider onsite visit with patient + interpreter and get brother on phone."}]},
+  {id:14,question:"New trach + new PEG + HD patient with Humana insurance needing SCIR. Any suggestions?",asker:"Shiellina",date:"Nov 10, 2025",tags:["snf","trach","insurance"],icon:"🩺",answers:[{author:"Tameka",text:"Complete Care Multi Med may take both, or check if patient qualifies for LTACH. Also: AL Post Acute, FC Homewood."}]},
+  {id:15,question:"Western Maryland Hospital for uninsured/undocumented LTACH patients — viable option?",asker:"Vijay",date:"Nov 13, 2025",tags:["ltc","uninsured"],icon:"🌐",answers:[{author:"Traci Wheeler",text:"Western Maryland can accept uninsured/undocumented patients. SW Director Debbie Ferguson: 301-745-4543. Note: they had a waitlist and referral pause due to staffing."}]},
+  {id:16,question:"SNFs that have accepted oncology patients receiving active radiation or chemo — any tips?",asker:"Vijay",date:"Nov 13, 2025",tags:["snf","insurance"],icon:"🎗️",answers:[{author:"Traci Wheeler",text:"SNFs consider on a case-by-case basis. Better success when treatment is through a hospital system vs. standalone clinic (billing-related per liaisons). Transportation to/from treatment is a key factor."}]},
+  {id:17,question:"Patient at UM DTC being transferred to University of Michigan hospital. Will insurance cover transportation? Does CM need auth even though hospital is out of state?",asker:"Ashley",date:"Nov 14, 2025",tags:["transport","insurance"],icon:"✈️",answers:[]},
+  {id:18,question:"Has anyone completed authorization documentation for air ambulance through BCBS?",asker:"Ashley",date:"Nov 19, 2025",tags:["transport","insurance"],icon:"✈️",answers:[]},
+  {id:19,question:"Does anyone know of a charitable DME company?",asker:"Shiellina",date:"Nov 19, 2025",tags:["dme","financial"],icon:"♿",answers:[{author:"Erin",text:"Partners in Care (DME) has walkers and equipment. Note: they close at 5pm."}]},
+  {id:20,question:"DDA patient under 22, hospitalized over 48 hours — what is the escalation process?",asker:"Vijay",date:"Feb 4, 2026",tags:["ltc"],icon:"📋",answers:[{author:"Tina / Maria (Dir CM NW)",text:"Hospital Use Overstay process: for patients 22 or under in hospital >48hrs, escalate to the Hospital Use Overstay admin who will intervene and expedite discharge."}]},
+  {id:21,question:"Any contacts for FutureCare Pineview? Need admissions to update on a case status.",asker:"Vijay",date:"Mar 11, 2026",tags:["snf"],icon:"📞",answers:[{author:"Tina",text:"I can check with the FutureCare liaison at NWH tomorrow for a contact."}]},
+  {id:22,question:"Contract patient re-hospitalized at Good Sam — ALF unwilling to accept her back due to challenging behaviors. Contract terminated. How to proceed?",asker:"Nicole",date:"Mar 27, 2026",tags:["alf","behavioral"],icon:"🏥",answers:[{author:"Nicole",text:"ALF contract terminated — patient cannot return under the same contract. If the hospital wants to engage their own contract, SilverStay can assist. Tameka reviewing the case for support."}]},
+  {id:23,question:"Is PT/OT evaluation required before transitioning to another level of care (e.g. ARH) even if not completed during the hospital stay?",asker:"Ericka",date:"Dec 16, 2025",tags:["ltc","snf"],icon:"📋",answers:[]},
+  {id:24,question:"Any recommendations for skilled home health that takes private pay?",asker:"Erin",date:"Nov 13, 2025",tags:["financial"],icon:"🏡",answers:[]},
+  {id:25,question:"Group homes providing services for disabled patients — any experience?",asker:"Shiellina",date:"Nov 5, 2025",tags:["housing","behavioral"],icon:"🏠",answers:[{author:"Tina",text:"What issue is coming up with the group home?"}]}
+];
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function render(cases){
+  const feed=document.getElementById('caseFeed');
+  const cnt=document.getElementById('resultCount');
+  if(!cases.length){cnt.textContent='';feed.innerHTML='<div class="empty-state">No matching cases — try different keywords or clear the filter.</div>';return;}
+  cnt.textContent=cases.length+' case'+(cases.length!==1?'s':'');
+  feed.innerHTML=cases.map((c,i)=>{
+    const id=c.id??i;
+    const tags=(c.tags||[]).map(t=>`<span class="tag tag-${t}">${t.toUpperCase()}</span>`).join('');
+    const body=(!c.answers||!c.answers.length)
+      ?`<p class="no-ans">No recorded answers yet — check Slack for the latest thread.</p>`
+      :c.answers.map(a=>`<div class="answer-block"><div class="answer-avatar">${esc(a.author||'?').charAt(0)}</div><div><div class="answer-author">${esc(a.author||'')}</div><div class="answer-text">${esc(a.text||'').replace(/\n/g,'<br>')}</div></div></div>`).join('');
+    return `<div class="case-card" id="card-${id}" onclick="tog('card-${id}')">
+      <div class="card-header">
+        <div class="card-icon">${c.icon||'📋'}</div>
+        <div class="card-meta">
+          <div class="card-question">${esc(c.question)}</div>
+          <div class="card-tags">${tags}<span class="card-asker">— ${esc(c.asker||'')}</span></div>
+        </div>
+        <div class="card-date">${esc(c.date||'')}</div>
+        <div class="chevron">▼</div>
+      </div>
+      <div class="card-body">${body}</div>
+    </div>`;
+  }).join('');
+}
+
+function tog(id){document.getElementById(id)?.classList.toggle('expanded');}
+
+function applyFilter(){
+  shown=activeFilter==='all'?[...all]:all.filter(c=>c.tags&&c.tags.includes(activeFilter));
+  render(shown);
+}
+
+function setFilter(f,btn){
+  activeFilter=f;
+  document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('aiAnswer').style.display='none';
+  document.getElementById('searchInput').value='';
+  document.getElementById('quickTopics').style.display=f==='all'?'block':'none';
+  applyFilter();
+}
+
+function qs(q){document.getElementById('searchInput').value=q;doSearch();}
+
+async function callAI(system, userMsg, maxTokens){
+  const r = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens,system,messages:[{role:'user',content:userMsg}]})
+  });
+  const d = await r.json();
+  return d.content?.find(b=>b.type==='text')?.text||'';
+}
+
+async function doSearch(){
+  const query=document.getElementById('searchInput').value.trim();
+  if(!query)return;
+  const kw=query.toLowerCase().split(/\s+/).filter(w=>w.length>2);
+  shown=all.filter(c=>{
+    const hay=[c.question,...(c.tags||[]),...(c.answers||[]).map(a=>a.text)].join(' ').toLowerCase();
+    return kw.some(k=>hay.includes(k));
+  });
+  document.getElementById('quickTopics').style.display='none';
+  render(shown);
+
+  const btn=document.getElementById('searchBtn');
+  const btnText=document.getElementById('btnText');
+  const aiDiv=document.getElementById('aiAnswer');
+  const aiText=document.getElementById('aiAnswerText');
+  btn.disabled=true;
+  btnText.innerHTML='<span class="loading-dots"><span></span><span></span><span></span></span>';
+  aiDiv.style.display='block';
+  aiText.innerHTML='<span class="loading-dots"><span></span><span></span><span></span></span> Synthesizing…';
+
+  const ctx=all.map(c=>`Q: ${c.question}\nBy: ${c.asker} (${c.date})\nTags: ${(c.tags||[]).join(',')}\n${(c.answers||[]).map(a=>`Answer from ${a.author}: ${a.text}`).join('\n')}`).join('\n\n---\n\n');
+  try{
+    const answer = await callAI(
+      `You are a practical healthcare case management assistant for SilverStay. Help care navigators find discharge solutions using the team's real Slack knowledge base. Be specific — reference facilities, contacts, dollar amounts when they appear. 3-6 sentences or a short bulleted list. Only use what's in the knowledge base or general CM expertise.`,
+      `Knowledge base:\n\n${ctx}\n\n---\n\nQuestion: "${query}"\n\nPractical answer:`,
+      800
+    );
+    aiText.textContent=answer;
+  }catch{aiText.textContent='⚠️ AI unavailable — browse the cards below for relevant cases.';}
+  btn.disabled=false;btnText.textContent='Ask AI';
+}
+
+document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+
+function setSyncing(v){
+  document.getElementById('syncDot').className='dot'+(v?' spin':'');
+  document.getElementById('syncBtn').className='sync-badge'+(v?' syncing':'');
+  document.getElementById('syncLabel').textContent=v?'Syncing…':'Live';
+}
+function setLastSync(d){
+  const el=document.getElementById('lastSyncLabel');
+  if(el)el.textContent='Updated '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+function save(c){try{localStorage.setItem(CASES_KEY,JSON.stringify(c));}catch{}}
+function load(){try{return JSON.parse(localStorage.getItem(CASES_KEY)||'null');}catch{return null;}}
+
+async function syncNow(){
+  if(isSyncing)return;
+  isSyncing=true;setSyncing(true);
+  try{
+    const TRANSCRIPT=`tameka: Good morning, I have a 35 y/o female, homeless with extensive psych issues. She has limited income $380/month. She has refused shelter. Are there any supportive housing options? [2026-03-12]
+THREAD Tina: Any substance abuse issues or just psych?
+THREAD tameka: Just psych no SUDS
+THREAD Tina: healthy mind Maryland transitional housing 443-241-7940
+THREAD Tina: Project Plase 410-837-1400
+THREAD tameka: I too have had issues with Project Plase. I will contact Health Minds.
+
+Vijay: Anyone have contacts for FutureCare Pineview? [2026-03-11]
+THREAD Tina: I can ask the FC liaison at NWH tomorrow
+
+tameka: I have a patient who is 462lbs. Has anyone had success with placement at this weight? [2026-02-12]
+THREAD Ashley: Can the patient stand and pivot?
+THREAD tameka: Mod A with sit to supine, max A with scooting, no limb control
+THREAD Ashley: Only success when patient can stand — feedback from every facility
+THREAD Ashley: Either under 400 or have to be able to stand
+THREAD Vijay: likely ALF contract or work on weight reduction: medication, PT/OT, nutrition plan
+
+Vijay: Info from Tina and Maria (Dir of CM at NW): Hospital use overstay — process for patients 22 or under in hospital for >48hrs — can escalate DDA patients to Hospital use overstay admin who will intervene and expedite discharge [2026-02-04]
+
+Vijay: Complex case at MedStar — clinical team open to outside Neuropsych expert for TBI patient in restraints 20+ days. Any thoughts? [2026-01-15]
+THREAD Erin: Dr. Swanton at LifeBridge eswanton@lifebridgehealth.org has TBI experience
+THREAD Ashley: TBI waiver folks at UMROI might help
+
+nicole: Put together a list of ALFs that can consider budget of $2k or less for minimal care needs patients [2026-01-12]
+
+Erin: 58-year-old woman with paranoid schizophrenia. $1400/month income, no payer, elopement risk, refuses meds. Guardianship pending. Needs secure environment. Any suggestions? [2026-01-07]
+
+Erin: Which LTC SNFs have trach beds available? [2026-01-05]
+
+Vijay: Need to place female patient — ambulatory, no behaviors, supervision only, wandering risk. $1000/month. Can get her leveled for LTC. Baltimore facility? [2026-01-02]
+
+Erin: Bed-bound 78yo from Burma, bilateral lower leg wounds + wound vac, no insurance, not eligible. Lives alone with 7 steps. Calls out to Little Sisters of the Poor. Any other suggestions? [2025-12-22]
+
+nicole: Complex contract case: patient not a citizen, uninsured. UMROI paying $3k/month at ALF. Brother has cancer and can't bring to Georgia. What else can we do? [2025-12-19]
+THREAD nicole/Vijay: Schedule meeting with Jenna at UMROI on long-term contract. Onsite visit with interpreter.
+
+Erin: Need LTC facility accepting patient with poly SA history, stable on Methadone, suicide attempt history. Autumn Lake regional denial. [2025-12-18]
+
+Cristine: LTC admissions — is POA/guardian required for financial screen? Can non-POA family sign? Pathways when no POA and no guardian? [2025-12-05]
+
+Ashley: Air ambo authorization through BCBS — anyone done this? [2025-11-19]
+
+Shiellina: Does anyone know of a charitable DME company? [2025-11-19]
+THREAD Erin: Partners in Care has walkers, closes at 5pm
+
+Ashley: Patient at UM DTC being transferred to University of Michigan. Will insurance cover transportation? Auth needed for out-of-state hospital? [2025-11-14]
+
+Vijay: Western Maryland Hospital from Traci at MedStar — can accept uninsured/undocumented patients. SW Director Debbie Ferguson 301-745-4543. Had waitlist/staffing pause. [2025-11-13]
+
+Vijay: SNFs accepting oncology patients from Traci — more success when treatment through hospital system vs standalone clinic (billing). Transportation is key factor. [2025-11-13]
+
+Erin: Any recommendations for skilled home health that takes private pay? [2025-11-13]
+
+Shiellina: New trach, new PEG and HD patient with Humana needing SCIR. Any suggestions? [2025-11-10]
+THREAD tameka: Complete Care Multi Med may take both, or try LTACH
+THREAD tameka: AL Post Acute, FC Homewood
+
+Vijay: Gold standard for LOC submission for borderline LTC patients? Barriers for citizen with no Medicare/Medicaid and no bank account? [2025-11-05]
+THREAD Tina: Submit LOC with ALL NEEDS — OT PT SLP wound care ADLs. Include summary in comments. Open enrollment for Medicare — MA office should screen.
+
+Ashley: SNF admission to Lorien — barriers are trach needs and CRE/CRO isolation. [2025-11-05]
+THREAD Tina: Lorien Bel Air, Columbia, Mt Airy accept trachs. Isolation is bigger issue — need private room. New trach?
+
+Vijay: Patient $800 income, state guardianship, must be licensed ALF. Any suggestions? [2025-11-06]
+THREAD tameka: 3-month hospital contract to ALF until patient can apply for waiver
+
+Erin: SNF for young bariatric patient under 500 lbs with recent criminal record from correctional facility? Total care. [2025-11-05]
+
+Shiellina: Group homes providing services for disabled patients — any experience? [2025-11-05]
+
+nicole: Contract patient re-hospitalized at Good Sam: ALF unwilling to accept back due to challenging behaviors. Contract terminated. [2026-03-27]
+THREAD tameka: Added to list, will connect with Mia at Good Sam`;
+
+    const raw = await callAI(
+      `Extract all substantive clinical case questions from this Slack transcript. Return ONLY a valid JSON array — no markdown, no explanation, no preamble.\n\nSchema: [{id,question,asker,date,tags,icon,answers:[{author,text}]}]\n\nValid tags (apply all that fit): snf,alf,ltc,housing,financial,behavioral,insurance,transport,trach,bariatric,dme,uninsured\n\nSkip: join/leave events, social chatter, pure logistics with no clinical content.`,
+      `Extract cases from this Slack transcript:\n\n${TRANSCRIPT}\n\nReturn ONLY the JSON array.`,
+      8000
+    );
+    const cleaned=raw.replace(/```json\s*/gi,'').replace(/```\s*/gi,'').trim();
+    const s=cleaned.indexOf('['),en=cleaned.lastIndexOf(']');
+    if(s!==-1&&en!==-1){
+      const parsed=JSON.parse(cleaned.slice(s,en+1));
+      if(Array.isArray(parsed)&&parsed.length){
+        all=parsed;save(all);
+        const now=new Date();localStorage.setItem(TS_KEY,now.toISOString());setLastSync(now);
+      }
+    }
+  }catch(err){console.warn('sync failed',err);}
+  document.getElementById('loadingSkel').style.display='none';
+  applyFilter();setSyncing(false);isSyncing=false;
+}
+
+(()=>{
+  const cached=load();
+  if(cached&&cached.length){
+    all=cached;shown=[...all];
+    document.getElementById('loadingSkel').style.display='none';
+    render(shown);
+    const t=localStorage.getItem(TS_KEY);
+    if(t)setLastSync(new Date(t));
+  } else {
+    all=[...SEED];
+  }
+  syncNow();
+})();
+</script>
+</body>
+</html>
