@@ -15,15 +15,13 @@
     --text: #1e293b;
     --text-muted: #64748b;
     --border: #dde3ed;
-    --white: #ffffff;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--slate); color: var(--text); min-height: 100vh; }
+  html, body { width: 100%; font-family: 'DM Sans', sans-serif; background: var(--slate); color: var(--text); }
 
   header {
-    background: var(--navy); padding: 0 1.5rem;
-    display: flex; align-items: center; justify-content: space-between;
-    height: 58px; position: sticky; top: 0; z-index: 100;
+    background: var(--navy); width: 100%; padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between; height: 58px;
     box-shadow: 0 2px 12px rgba(13,31,53,0.3);
   }
   .logo { display: flex; align-items: center; gap: 10px; }
@@ -38,34 +36,32 @@
     display: flex; align-items: center; gap: 7px;
     background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
     color: rgba(255,255,255,0.55); font-size: 11px; padding: 4px 11px;
-    border-radius: 20px; cursor: pointer; transition: background 0.15s;
-    font-family: 'DM Sans', sans-serif;
+    border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif;
   }
-  .sync-badge:hover { background: rgba(255,255,255,0.12); }
   .sync-badge.syncing { color: #60a5fa; border-color: rgba(96,165,250,0.4); }
-  .dot { width: 5px; height: 5px; border-radius: 50%; background: #4ade80; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: #4ade80; flex-shrink: 0; }
   .dot.spin { background: #60a5fa; animation: blink 0.7s infinite; }
   @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
 
   .hero {
-    background: var(--navy); padding: 2rem 1.5rem 2.5rem;
+    background: var(--navy); width: 100%; padding: 2.5rem 2rem 3rem;
     text-align: center; position: relative; overflow: hidden;
   }
   .hero::before {
     content:''; position:absolute; top:-60px; left:50%; transform:translateX(-50%);
-    width:500px; height:260px;
+    width:700px; height:300px;
     background:radial-gradient(ellipse,rgba(59,130,246,0.15) 0%,transparent 70%);
     pointer-events:none;
   }
   .hero h1 {
     font-family: 'DM Serif Display', serif;
-    font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
     color: white; line-height: 1.2; margin-bottom: 8px; position: relative;
   }
   .hero h1 em { color: var(--accent); font-style: italic; }
   .hero p { color: rgba(255,255,255,0.5); font-size: 13px; margin-bottom: 1.5rem; }
 
-  .search-container { max-width: 620px; margin: 0 auto; position: relative; z-index: 2; }
+  .search-container { width: 100%; max-width: 660px; margin: 0 auto; }
   .search-wrapper {
     display: flex; background: white; border-radius: 12px;
     padding: 5px 5px 5px 16px; align-items: center; gap: 10px;
@@ -74,15 +70,14 @@
   .search-wrapper:focus-within { border-color: var(--accent); }
   #searchInput {
     flex: 1; border: none; outline: none; font-family: 'DM Sans', sans-serif;
-    font-size: 14px; color: var(--text); background: transparent;
+    font-size: 14px; color: var(--text); background: transparent; min-width: 0;
   }
   #searchInput::placeholder { color: #94a3b8; }
   #searchBtn {
     background: var(--navy); color: white; border: none; border-radius: 8px;
     padding: 9px 18px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
-    cursor: pointer; transition: background 0.2s; white-space: nowrap;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0;
   }
-  #searchBtn:hover { background: var(--navy-mid); }
   #searchBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
   .filter-bar { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
@@ -94,16 +89,16 @@
   }
   .filter-pill:hover, .filter-pill.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-  main { max-width: 860px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+  main { width: 100%; padding: 1.5rem 2rem 3rem; }
+
   #statusBar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; min-height: 24px; }
   #resultCount { font-size: 12px; color: var(--text-muted); font-weight: 500; }
   #lastSyncLabel { font-size: 11px; color: #94a3b8; }
 
   #aiAnswer {
     display: none; background: white; border-radius: 14px;
-    border: 2px solid var(--accent); padding: 1.25rem;
-    margin-bottom: 1.25rem; box-shadow: 0 4px 20px rgba(59,130,246,0.1);
-    animation: fadeIn 0.3s ease;
+    border: 2px solid var(--accent); padding: 1.25rem; margin-bottom: 1.25rem;
+    box-shadow: 0 4px 20px rgba(59,130,246,0.1); animation: fadeIn 0.3s ease;
   }
   .ai-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
   .ai-chip {
@@ -129,10 +124,11 @@
   .topic-chip:hover { border-color: var(--accent); color: var(--accent); background: #eff6ff; }
 
   #caseFeed { display: flex; flex-direction: column; gap: 10px; }
+
   .case-card {
     background: white; border-radius: 12px; border: 1px solid var(--border);
     overflow: hidden; transition: box-shadow 0.2s, transform 0.15s;
-    animation: fadeIn 0.3s ease; cursor: pointer;
+    animation: fadeIn 0.3s ease; cursor: pointer; width: 100%;
   }
   .case-card:hover { box-shadow: 0 4px 20px rgba(13,31,53,0.09); transform: translateY(-1px); }
   .case-card.expanded .card-body { display: block; }
@@ -187,7 +183,6 @@
   @keyframes shimmer { 0%,100%{opacity:1}50%{opacity:0.5} }
   .empty-state { text-align: center; padding: 2.5rem; color: var(--text-muted); font-size: 13px; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-  @media(max-width:520px){ .card-date{display:none} }
 </style>
 </head>
 <body>
@@ -264,12 +259,12 @@
 </main>
 
 <script>
-const API_KEY = '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';
-const CASES_KEY = 'ss_cases_v6', TS_KEY = 'ss_ts_v6';
-let all = [], shown = [], activeFilter = 'all', isSyncing = false;
+const API_KEY='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';
+const CASES_KEY='ss_cases_v7',TS_KEY='ss_ts_v7';
+let all=[],shown=[],activeFilter='all',isSyncing=false;
 
-const SEED = [
-  {id:1,question:"Has anyone had luck with SNF admission to Lorien? Barriers are trach needs and CRE/CRO isolation.",asker:"Ashley",date:"Nov 5, 2025",tags:["snf","trach"],icon:"🩺",answers:[{author:"Tina",text:"Lorien Bel Air, Columbia and Mt Airy are their facilities that accept trachs. Isolation is the bigger issue — they'll likely need a private room. Is it a new trach (less than 30 days)?"}]},
+const SEED=[
+  {id:1,question:"Has anyone had luck with SNF admission to Lorien? Barriers are trach needs and CRE/CRO isolation.",asker:"Ashley",date:"Nov 5, 2025",tags:["snf","trach"],icon:"🩺",answers:[{author:"Tina",text:"Lorien Bel Air, Columbia and Mt Airy accept trachs. Isolation is the bigger issue — they'll likely need a private room. Is it a new trach (less than 30 days)?"}]},
   {id:2,question:"Patient with $800/month income, state guardianship requires licensed ALF (not supportive care home). Any suggestions?",asker:"Vijay",date:"Nov 6, 2025",tags:["alf","financial"],icon:"💰",answers:[{author:"Tameka",text:"Have the hospital do a 3-month contract to ALF until the patient can apply for the waiver to help offset the cost."}]},
   {id:3,question:"Any suggestions for a SNF willing to take a young bariatric patient (under 500 lbs) with recent criminal record, dropped from correctional facility? Total care.",asker:"Erin",date:"Nov 5, 2025",tags:["snf","bariatric"],icon:"⚖️",answers:[]},
   {id:4,question:"Gold standard for submitting a LOC for patients on the border of LTC appropriate or not? Barriers for citizen who hasn't applied for Medicare/Medicaid going direct from hospital to LTC?",asker:"Vijay",date:"Nov 5, 2025",tags:["ltc","financial","insurance"],icon:"📋",answers:[{author:"Tina",text:"Submit LOC to include ALL NEEDS — OT, PT, SLP, wound care, ADLs. Ask OT for specific ADL and cognitive eval. Include summary in comments explaining why less restrictive won't work.\n2. Open enrollment for Medicare — MA office at the hospital should screen to see if they qualify for MA."}]},
@@ -325,12 +320,10 @@ function render(cases){
 }
 
 function tog(id){document.getElementById(id)?.classList.toggle('expanded');}
-
 function applyFilter(){
   shown=activeFilter==='all'?[...all]:all.filter(c=>c.tags&&c.tags.includes(activeFilter));
   render(shown);
 }
-
 function setFilter(f,btn){
   activeFilter=f;
   document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
@@ -340,16 +333,15 @@ function setFilter(f,btn){
   document.getElementById('quickTopics').style.display=f==='all'?'block':'none';
   applyFilter();
 }
-
 function qs(q){document.getElementById('searchInput').value=q;doSearch();}
 
-async function callAI(system, userMsg, maxTokens){
-  const r = await fetch('https://api.anthropic.com/v1/messages',{
+async function callAI(system,userMsg,maxTokens){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01'},
     body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens,system,messages:[{role:'user',content:userMsg}]})
   });
-  const d = await r.json();
+  const d=await r.json();
   return d.content?.find(b=>b.type==='text')?.text||'';
 }
 
@@ -363,7 +355,6 @@ async function doSearch(){
   });
   document.getElementById('quickTopics').style.display='none';
   render(shown);
-
   const btn=document.getElementById('searchBtn');
   const btnText=document.getElementById('btnText');
   const aiDiv=document.getElementById('aiAnswer');
@@ -372,14 +363,11 @@ async function doSearch(){
   btnText.innerHTML='<span class="loading-dots"><span></span><span></span><span></span></span>';
   aiDiv.style.display='block';
   aiText.innerHTML='<span class="loading-dots"><span></span><span></span><span></span></span> Synthesizing…';
-
   const ctx=all.map(c=>`Q: ${c.question}\nBy: ${c.asker} (${c.date})\nTags: ${(c.tags||[]).join(',')}\n${(c.answers||[]).map(a=>`Answer from ${a.author}: ${a.text}`).join('\n')}`).join('\n\n---\n\n');
   try{
-    const answer = await callAI(
+    const answer=await callAI(
       `You are a practical healthcare case management assistant for SilverStay. Help care navigators find discharge solutions using the team's real Slack knowledge base. Be specific — reference facilities, contacts, dollar amounts when they appear. 3-6 sentences or a short bulleted list. Only use what's in the knowledge base or general CM expertise.`,
-      `Knowledge base:\n\n${ctx}\n\n---\n\nQuestion: "${query}"\n\nPractical answer:`,
-      800
-    );
+      `Knowledge base:\n\n${ctx}\n\n---\n\nQuestion: "${query}"\n\nPractical answer:`,800);
     aiText.textContent=answer;
   }catch{aiText.textContent='⚠️ AI unavailable — browse the cards below for relevant cases.';}
   btn.disabled=false;btnText.textContent='Ask AI';
@@ -403,84 +391,11 @@ async function syncNow(){
   if(isSyncing)return;
   isSyncing=true;setSyncing(true);
   try{
-    const TRANSCRIPT=`tameka: Good morning, I have a 35 y/o female, homeless with extensive psych issues. She has limited income $380/month. She has refused shelter. Are there any supportive housing options? [2026-03-12]
-THREAD Tina: Any substance abuse issues or just psych?
-THREAD tameka: Just psych no SUDS
-THREAD Tina: healthy mind Maryland transitional housing 443-241-7940
-THREAD Tina: Project Plase 410-837-1400
-THREAD tameka: I too have had issues with Project Plase. I will contact Health Minds.
+    const TRANSCRIPT=`tameka: 35 y/o female, homeless, extensive psych issues, $380/month income, refused shelter. Supportive housing options? [2026-03-12]\nTHREAD Tina: Any substance abuse issues or just psych?\nTHREAD tameka: Just psych no SUDS\nTHREAD Tina: Healthy Mind Maryland Transitional Housing 443-241-7940\nTHREAD Tina: Project Plase 410-837-1400\nTHREAD tameka: Issues with Project Plase. Will contact Health Minds.\n\nVijay: Contacts for FutureCare Pineview? [2026-03-11]\nTHREAD Tina: I can ask the FC liaison at NWH tomorrow\n\ntameka: Patient 462lbs. Anyone had success with placement at this weight? [2026-02-12]\nTHREAD Ashley: Can the patient stand and pivot?\nTHREAD tameka: Mod A with sit to supine, max A with scooting, no limb control\nTHREAD Ashley: Only success when patient can stand\nTHREAD Ashley: Either under 400 or have to be able to stand\nTHREAD Vijay: Likely ALF contract or work on weight reduction: medication, PT/OT, nutrition plan\n\nVijay: Hospital use overstay — patients 22 or under in hospital >48hrs — escalate DDA patients to Hospital Use Overstay admin [2026-02-04]\n\nVijay: Complex MedStar case — outside Neuropsych expert for TBI patient in restraints 20+ days [2026-01-15]\nTHREAD Erin: Dr. Swanton at LifeBridge eswanton@lifebridgehealth.org has TBI experience\nTHREAD Ashley: TBI waiver folks at UMROI might help\n\nNicole: ALFs that can consider budget of $2k or less for minimal care needs patients [2026-01-12]\n\nErin: 58-year-old woman with paranoid schizophrenia. $1400/month income, no payer, elopement risk, refuses meds. Guardianship pending. Needs secure environment. [2026-01-07]\n\nErin: Which LTC SNFs have trach beds available? [2026-01-05]\n\nVijay: Need to place female patient — ambulatory, no behaviors, supervision only, wandering risk. $1000/month. LTC leveled. Baltimore facility? [2026-01-02]\n\nErin: Bed-bound 78yo from Burma, bilateral lower leg wounds + wound vac, no insurance. Lives alone 7 steps. Little Sisters of the Poor contacted. [2025-12-22]\n\nNicole: Complex contract case: patient not a citizen, uninsured. UMROI paying $3k/month at ALF. Brother has cancer and can't bring to Georgia. [2025-12-19]\nTHREAD Nicole/Vijay: Schedule meeting with Jenna at UMROI on long-term contract. Onsite visit with interpreter.\n\nErin: Need LTC facility accepting patient with poly SA history, stable on Methadone, suicide attempt history. Autumn Lake regional denial. [2025-12-18]\n\nCristine: LTC admissions — POA/guardian required for financial screen? Can non-POA family sign? Pathways when no POA and no guardian? [2025-12-05]\n\nAshley: Air ambo authorization through BCBS — anyone done this? [2025-11-19]\n\nShiellina: Charitable DME company? [2025-11-19]\nTHREAD Erin: Partners in Care has walkers, closes at 5pm\n\nAshley: Patient at UM DTC being transferred to University of Michigan. Will insurance cover transportation? Auth needed for out-of-state hospital? [2025-11-14]\n\nVijay: Western Maryland Hospital from Traci — can accept uninsured/undocumented patients. SW Director Debbie Ferguson 301-745-4543. Had waitlist/staffing pause. [2025-11-13]\n\nVijay: SNFs accepting oncology patients from Traci — more success when treatment through hospital system vs standalone clinic. Transportation is key factor. [2025-11-13]\n\nErin: Skilled home health that takes private pay? [2025-11-13]\n\nShiellina: New trach, new PEG and HD patient with Humana needing SCIR. [2025-11-10]\nTHREAD Tameka: Complete Care Multi Med may take both, or try LTACH\nTHREAD Tameka: AL Post Acute, FC Homewood\n\nVijay: Gold standard for LOC submission for borderline LTC patients? Barriers for citizen with no Medicare/Medicaid and no bank account? [2025-11-05]\nTHREAD Tina: Submit LOC with ALL NEEDS. Include summary in comments. Open enrollment for Medicare — MA office should screen.\n\nAshley: SNF admission to Lorien — barriers are trach needs and CRE/CRO isolation. [2025-11-05]\nTHREAD Tina: Lorien Bel Air, Columbia, Mt Airy accept trachs. Isolation bigger issue — need private room.\n\nVijay: Patient $800 income, state guardianship, must be licensed ALF. [2025-11-06]\nTHREAD Tameka: 3-month hospital contract to ALF until patient can apply for waiver\n\nErin: SNF for young bariatric patient under 500 lbs with recent criminal record from correctional facility? Total care. [2025-11-05]\n\nShiellina: Group homes providing services for disabled patients? [2025-11-05]\n\nNicole: Contract patient re-hospitalized at Good Sam: ALF unwilling to accept back due to challenging behaviors. Contract terminated. [2026-03-27]\nTHREAD Tameka: Added to list, will connect with Mia at Good Sam`;
 
-Vijay: Anyone have contacts for FutureCare Pineview? [2026-03-11]
-THREAD Tina: I can ask the FC liaison at NWH tomorrow
-
-tameka: I have a patient who is 462lbs. Has anyone had success with placement at this weight? [2026-02-12]
-THREAD Ashley: Can the patient stand and pivot?
-THREAD tameka: Mod A with sit to supine, max A with scooting, no limb control
-THREAD Ashley: Only success when patient can stand — feedback from every facility
-THREAD Ashley: Either under 400 or have to be able to stand
-THREAD Vijay: likely ALF contract or work on weight reduction: medication, PT/OT, nutrition plan
-
-Vijay: Info from Tina and Maria (Dir of CM at NW): Hospital use overstay — process for patients 22 or under in hospital for >48hrs — can escalate DDA patients to Hospital use overstay admin who will intervene and expedite discharge [2026-02-04]
-
-Vijay: Complex case at MedStar — clinical team open to outside Neuropsych expert for TBI patient in restraints 20+ days. Any thoughts? [2026-01-15]
-THREAD Erin: Dr. Swanton at LifeBridge eswanton@lifebridgehealth.org has TBI experience
-THREAD Ashley: TBI waiver folks at UMROI might help
-
-nicole: Put together a list of ALFs that can consider budget of $2k or less for minimal care needs patients [2026-01-12]
-
-Erin: 58-year-old woman with paranoid schizophrenia. $1400/month income, no payer, elopement risk, refuses meds. Guardianship pending. Needs secure environment. Any suggestions? [2026-01-07]
-
-Erin: Which LTC SNFs have trach beds available? [2026-01-05]
-
-Vijay: Need to place female patient — ambulatory, no behaviors, supervision only, wandering risk. $1000/month. Can get her leveled for LTC. Baltimore facility? [2026-01-02]
-
-Erin: Bed-bound 78yo from Burma, bilateral lower leg wounds + wound vac, no insurance, not eligible. Lives alone with 7 steps. Calls out to Little Sisters of the Poor. Any other suggestions? [2025-12-22]
-
-nicole: Complex contract case: patient not a citizen, uninsured. UMROI paying $3k/month at ALF. Brother has cancer and can't bring to Georgia. What else can we do? [2025-12-19]
-THREAD nicole/Vijay: Schedule meeting with Jenna at UMROI on long-term contract. Onsite visit with interpreter.
-
-Erin: Need LTC facility accepting patient with poly SA history, stable on Methadone, suicide attempt history. Autumn Lake regional denial. [2025-12-18]
-
-Cristine: LTC admissions — is POA/guardian required for financial screen? Can non-POA family sign? Pathways when no POA and no guardian? [2025-12-05]
-
-Ashley: Air ambo authorization through BCBS — anyone done this? [2025-11-19]
-
-Shiellina: Does anyone know of a charitable DME company? [2025-11-19]
-THREAD Erin: Partners in Care has walkers, closes at 5pm
-
-Ashley: Patient at UM DTC being transferred to University of Michigan. Will insurance cover transportation? Auth needed for out-of-state hospital? [2025-11-14]
-
-Vijay: Western Maryland Hospital from Traci at MedStar — can accept uninsured/undocumented patients. SW Director Debbie Ferguson 301-745-4543. Had waitlist/staffing pause. [2025-11-13]
-
-Vijay: SNFs accepting oncology patients from Traci — more success when treatment through hospital system vs standalone clinic (billing). Transportation is key factor. [2025-11-13]
-
-Erin: Any recommendations for skilled home health that takes private pay? [2025-11-13]
-
-Shiellina: New trach, new PEG and HD patient with Humana needing SCIR. Any suggestions? [2025-11-10]
-THREAD tameka: Complete Care Multi Med may take both, or try LTACH
-THREAD tameka: AL Post Acute, FC Homewood
-
-Vijay: Gold standard for LOC submission for borderline LTC patients? Barriers for citizen with no Medicare/Medicaid and no bank account? [2025-11-05]
-THREAD Tina: Submit LOC with ALL NEEDS — OT PT SLP wound care ADLs. Include summary in comments. Open enrollment for Medicare — MA office should screen.
-
-Ashley: SNF admission to Lorien — barriers are trach needs and CRE/CRO isolation. [2025-11-05]
-THREAD Tina: Lorien Bel Air, Columbia, Mt Airy accept trachs. Isolation is bigger issue — need private room. New trach?
-
-Vijay: Patient $800 income, state guardianship, must be licensed ALF. Any suggestions? [2025-11-06]
-THREAD tameka: 3-month hospital contract to ALF until patient can apply for waiver
-
-Erin: SNF for young bariatric patient under 500 lbs with recent criminal record from correctional facility? Total care. [2025-11-05]
-
-Shiellina: Group homes providing services for disabled patients — any experience? [2025-11-05]
-
-nicole: Contract patient re-hospitalized at Good Sam: ALF unwilling to accept back due to challenging behaviors. Contract terminated. [2026-03-27]
-THREAD tameka: Added to list, will connect with Mia at Good Sam`;
-
-    const raw = await callAI(
+    const raw=await callAI(
       `Extract all substantive clinical case questions from this Slack transcript. Return ONLY a valid JSON array — no markdown, no explanation, no preamble.\n\nSchema: [{id,question,asker,date,tags,icon,answers:[{author,text}]}]\n\nValid tags (apply all that fit): snf,alf,ltc,housing,financial,behavioral,insurance,transport,trach,bariatric,dme,uninsured\n\nSkip: join/leave events, social chatter, pure logistics with no clinical content.`,
-      `Extract cases from this Slack transcript:\n\n${TRANSCRIPT}\n\nReturn ONLY the JSON array.`,
-      8000
-    );
+      `Extract cases from this Slack transcript:\n\n${TRANSCRIPT}\n\nReturn ONLY the JSON array.`,8000);
     const cleaned=raw.replace(/```json\s*/gi,'').replace(/```\s*/gi,'').trim();
     const s=cleaned.indexOf('['),en=cleaned.lastIndexOf(']');
     if(s!==-1&&en!==-1){
